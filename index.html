@@ -82,117 +82,19 @@
             border-color: #94a3b8;
         }
     
-        /* Responsive layout for Android phones: editing remains comfortable,
-           while print/PDF keeps the exact A4 rules above. */
-        html { -webkit-text-size-adjust: 100%; }
-        body { overflow-x: hidden; }
-        input, textarea, select, button { touch-action: manipulation; }
-        input, textarea, select { font-size: 16px; }
-        button { min-height: 40px; }
-        .modal-backdrop { overflow-y: auto; align-items: flex-start; }
-        .modal-backdrop > div {
-            max-height: calc(100dvh - 24px);
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            margin: auto 0;
-        }
-        @media screen and (max-width: 640px) {
-            body { padding-bottom: 16px; }
-            header > div {
-                padding: 10px 12px !important;
-                align-items: stretch !important;
-                gap: 10px !important;
-            }
-            header h1 {
-                width: 100%;
-                font-size: 15px !important;
-                line-height: 1.35;
-            }
-            header > div > div:last-child {
-                display: grid !important;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                width: 100%;
-                gap: 7px !important;
-            }
-            header button {
-                min-height: 44px;
-                justify-content: center;
-                padding: 8px 7px !important;
-                font-size: 11px !important;
-                line-height: 1.25;
-                white-space: normal;
-            }
-            .a4-container {
-                width: calc(100% - 16px) !important;
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
-                margin: 8px auto !important;
-                padding: 18px 13px !important;
-                overflow: visible !important;
-                box-shadow: 0 4px 14px rgba(0,0,0,.10);
-            }
-            .a4-container input,
-            .a4-container textarea,
-            .a4-container select {
-                min-height: 36px;
-                font-size: 14px !important;
-                padding: 5px !important;
-            }
-            .a4-container table {
-                width: 100%;
-                table-layout: fixed;
-                font-size: 10px;
-            }
-            .a4-container th,
-            .a4-container td {
-                overflow-wrap: anywhere;
-                word-break: normal;
-                padding: 3px 2px !important;
-            }
-            .a4-container td input {
-                min-width: 0;
-                width: 100%;
-                font-size: 11px !important;
-            }
-            #modal-klien, #modal-barang {
-                padding: 10px !important;
-            }
-            #modal-klien > div, #modal-barang > div {
-                width: 100%;
-                max-width: none !important;
-                max-height: calc(100dvh - 20px);
-                padding: 16px !important;
-                border-radius: 14px;
-            }
-            #modal-klien input,
-            #modal-klien textarea,
-            #modal-barang input {
-                min-height: 44px;
-                padding: 10px !important;
-                font-size: 16px !important;
-            }
-            #modal-klien textarea { min-height: 76px; }
-            #modal-klien button, #modal-barang button {
-                min-height: 44px;
-            }
-            #modal-barang-list { max-height: none !important; }
-            #toast {
-                left: 12px;
-                right: 12px;
-                bottom: 12px;
-                justify-content: center;
-                font-size: 13px;
-            }
-        }
-        @media screen and (max-width: 360px) {
-            header > div > div:last-child { grid-template-columns: 1fr 1fr; }
-            .a4-container { padding: 14px 9px !important; }
-        }
+
 
     </style>
 </head>
 <body class="pb-8">
+
+
+    <div id="zoom-controls" class="no-print" aria-label="Kontrol zoom dokumen">
+        <button type="button" onclick="ubahZoom(-0.1)" aria-label="Perkecil">−</button>
+        <span id="zoom-level">100%</span>
+        <button type="button" onclick="ubahZoom(0.1)" aria-label="Perbesar">+</button>
+        <button type="button" onclick="resetZoom()" aria-label="Atur ulang zoom" style="font-size:12px;width:auto;padding:0 10px">Reset</button>
+    </div>
 
     <!-- Toast Notification (Non-Printable) -->
     <div id="toast" class="no-print fixed bottom-5 right-5 z-50 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl border border-slate-700 hidden flex items-center gap-2 transition-all duration-300">
@@ -209,7 +111,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 90 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 text-base">Edit Data Klien & Informasi Surat</h3>
+                        <h3 class="font-bold text-slate-900 text-base">Data Klien & Informasi Surat</h3>
                         <p class="text-xs text-slate-500">Kelola tujuan penawaran perusahaan mitra dengan mudah</p>
                     </div>
                 </div>
@@ -276,7 +178,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base">Edit Rincian Barang & Harga Pekerjaan</h3>
+                        <h3 class="font-bold text-slate-800 text-base">Rincian Barang & Harga Pekerjaan</h3>
                         <p class="text-xs text-slate-500">Kelola deskripsi, volume, dan nominal harga secara nyaman</p>
                     </div>
                 </div>
@@ -594,6 +496,25 @@
             setTimeout(() => {
                 toast.classList.add('hidden');
             }, 3000);
+        }
+
+
+        // Zoom hanya mengubah skala tampilan dokumen, bukan ukuran cetak A4.
+        let zoomDokumen = 1;
+        function terapkanZoom() {
+            const lembar = document.querySelector('.a4-container');
+            if (!lembar) return;
+            lembar.style.zoom = String(zoomDokumen);
+            const label = document.getElementById('zoom-level');
+            if (label) label.textContent = Math.round(zoomDokumen * 100) + '%';
+        }
+        function ubahZoom(nilai) {
+            zoomDokumen = Math.max(0.5, Math.min(1.5, Math.round((zoomDokumen + nilai) * 10) / 10));
+            terapkanZoom();
+        }
+        function resetZoom() {
+            zoomDokumen = 1;
+            terapkanZoom();
         }
 
         // AUTO SYNC CLIENT DATA
