@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download PDF - SUMBERBETON</title>
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body {
@@ -771,8 +772,39 @@
             return terbilang(Math.floor(n / 1000000000000)) + ' Triliun ' + terbilang(n % 1000000000000);
         }
 
-        window.onload = function() {
-            // Pulihkan hasil edit dari index.html sebelum menampilkan dokumen untuk PDF.
+        async function buatDanUnduhPDF() {
+            const target = document.querySelector('.a4-container');
+            if (!target) throw new Error('Area surat tidak ditemukan.');
+            if (typeof html2pdf === 'undefined') throw new Error('Library pembuat PDF belum berhasil dimuat.');
+
+            const tanggal = new Date().toISOString().slice(0, 10);
+            const opsi = {
+                margin: 0,
+                filename: 'Surat-Penawaran-SUMBERBETON-' + tanggal + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+                enableLinks: true,
+                onclone: function(clonedDoc) {
+                    const style = clonedDoc.createElement('style');
+                    style.textContent = '.action-col,.btn-remove-row{display:none!important} .a4-container{margin:0!important;box-shadow:none!important}';
+                    clonedDoc.head.appendChild(style);
+                }
+            };
+
+            await html2pdf().set(opsi).from(target).save();
+        }
+
+        window.onload = async function() {
+            // Pulihkan seluruh data hasil edit dari index.html.
             try {
                 const saved = sessionStorage.getItem('sumberbeton_download_data');
                 if (saved) {
@@ -803,8 +835,15 @@
             }
 
             renderTable();
-            // Buka dialog cetak setelah seluruh nilai dan total selesai dirender.
-            setTimeout(() => window.print(), 700);
+
+            // Beri waktu browser menyelesaikan layout dan memuat logo sebelum membuat PDF.
+            await new Promise(resolve => setTimeout(resolve, 900));
+            try {
+                await buatDanUnduhPDF();
+            } catch (error) {
+                console.error('PDF otomatis gagal:', error);
+                alert('PDF belum berhasil diunduh otomatis. Tekan tombol Unduh PDF untuk mencoba lagi.');
+            }
         };
     </script>
 </body>
