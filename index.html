@@ -721,10 +721,23 @@
         }
 
         function downloadPDF() {
-            // Cetak seluruh data surat yang sedang tampil agar dapat disimpan sebagai PDF.
-            // Pada Android/Chrome, pilih tujuan "Simpan sebagai PDF" pada dialog cetak.
-            showToast('Pilih “Simpan sebagai PDF” pada menu cetak untuk mengunduh surat penawaran.');
-            window.print();
+            // Simpan kondisi surat yang sedang diedit, lalu buka halaman khusus unduh PDF.
+            const fields = {};
+            document.querySelectorAll('.a4-container input[id], .a4-container textarea[id], .a4-container select[id]').forEach(el => {
+                fields[el.id] = el.value;
+            });
+            const snapshot = {
+                fields,
+                items: JSON.parse(JSON.stringify(items)),
+                isPPNAktif
+            };
+            try {
+                sessionStorage.setItem('sumberbeton_download_data', JSON.stringify(snapshot));
+                window.location.href = 'download.html';
+            } catch (error) {
+                showToast('Gagal menyiapkan halaman PDF. Silakan coba kembali.');
+                console.error(error);
+            }
         }
 
         function formatRupiah(angka) {
