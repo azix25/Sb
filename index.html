@@ -517,6 +517,48 @@
             terapkanZoom();
         }
 
+        // Pinch-to-zoom dua jari: satu jari tetap bebas untuk scroll dan edit.
+        (function aktifkanPinchZoom() {
+            let jarakAwal = 0;
+            let zoomAwal = 1;
+            let sedangPinch = false;
+
+            function jarakDuaJari(touches) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.hypot(dx, dy);
+            }
+
+            document.addEventListener('touchstart', function(event) {
+                if (event.touches.length === 2) {
+                    sedangPinch = true;
+                    jarakAwal = jarakDuaJari(event.touches);
+                    zoomAwal = zoomDokumen;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', function(event) {
+                if (!sedangPinch || event.touches.length !== 2) return;
+                event.preventDefault();
+                const jarakSekarang = jarakDuaJari(event.touches);
+                if (!jarakAwal) return;
+                const skala = jarakSekarang / jarakAwal;
+                zoomDokumen = Math.max(0.5, Math.min(1.5,
+                    Math.round((zoomAwal * skala) * 20) / 20
+                ));
+                terapkanZoom();
+            }, { passive: false });
+
+            function akhiriPinch(event) {
+                if (event.touches.length < 2) {
+                    sedangPinch = false;
+                    jarakAwal = 0;
+                }
+            }
+            document.addEventListener('touchend', akhiriPinch, { passive: true });
+            document.addEventListener('touchcancel', akhiriPinch, { passive: true });
+        })();
+
         // AUTO SYNC CLIENT DATA
         function syncClientSignature() {
             const clientCompany = document.getElementById('client-company-input').value.trim() || 'NAMA PERUSAHAAN KLIEN';
