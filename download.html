@@ -803,7 +803,14 @@
                 }
             };
 
-            await html2pdf().set(opsi).from(target).save();
+            // Di APK Android, kirim PDF ke jembatan native agar tersimpan ke folder Download.
+            // Di browser biasa, tetap gunakan mekanisme unduh html2pdf seperti sebelumnya.
+            if (typeof Android !== 'undefined' && Android && typeof Android.savePdf === 'function') {
+                const pdfDataUri = await html2pdf().set(opsi).from(target).outputPdf('datauristring');
+                Android.savePdf(pdfDataUri, opsi.filename);
+            } else {
+                await html2pdf().set(opsi).from(target).save();
+            }
         }
 
         window.onload = async function() {
