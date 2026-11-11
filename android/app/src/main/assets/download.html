@@ -904,7 +904,7 @@
                 enableLinks: true,
                 onclone: function(clonedDoc) {
                     const style = clonedDoc.createElement('style');
-                    style.textContent = '.action-col,.btn-remove-row{display:none!important} .a4-container{margin:0!important;box-shadow:none!important}';
+                    style.textContent = '.action-col,.btn-remove-row{display:none!important} .a4-container{width:210mm!important;height:297mm!important;min-height:297mm!important;max-height:297mm!important;margin:0!important;padding:10mm 12mm!important;overflow:hidden!important;box-shadow:none!important}';
                     clonedDoc.head.appendChild(style);
                 }
             };
