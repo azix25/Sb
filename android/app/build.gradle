@@ -4,6 +4,10 @@ android {
     namespace 'id.co.sumberbeton.app'
     compileSdk 35
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'id.co.sumberbeton.app'
         minSdk 26
