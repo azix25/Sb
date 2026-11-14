@@ -396,7 +396,6 @@
                             <th class="p-1.5 border border-slate-700 w-12">Satuan</th>
                             <th class="p-1.5 border border-slate-700 w-24">Harga (Rp)</th>
                             <th class="p-1.5 border border-slate-700 w-28">Total (Rp)</th>
-                            <th class="p-1.5 border border-slate-700 w-8 action-col no-print">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-300">
@@ -406,17 +405,14 @@
                         <tr class="bg-slate-50 font-semibold text-slate-800">
                             <td colspan="4" class="p-1 border border-slate-400 text-right font-bold text-slate-800">Subtotal Biaya:</td>
                             <td colspan="2" class="p-1 border border-slate-400 text-right font-extrabold text-slate-900" id="subtotal-val">Rp 0</td>
-                            <td class="action-col no-print border border-slate-400"></td>
                         </tr>
                         <tr class="bg-slate-50 font-semibold text-slate-800" id="row-ppn">
                             <td colspan="4" class="p-1 border border-slate-400 text-right">PPN 11%:</td>
                             <td colspan="2" class="p-1 border border-slate-400 text-right font-bold text-slate-900" id="ppn-val">Rp 0</td>
-                            <td class="action-col no-print border border-slate-400"></td>
                         </tr>
                         <tr class="bg-slate-100 font-bold text-slate-950">
                             <td colspan="4" class="p-1.5 border border-slate-400 text-right text-[10px] uppercase text-slate-900">Grand Total (Total Akhir):</td>
                             <td colspan="2" class="p-1.5 border border-slate-400 text-right font-black text-slate-950 text-xs" id="grandtotal-val">Rp 0</td>
-                            <td class="action-col no-print border border-slate-400"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -707,11 +703,6 @@
                     <td class="p-1 border border-slate-300 text-right font-extrabold text-slate-900">
                         ${formatRupiah(totalRow)}
                     </td>
-                    <td class="p-0.5 border border-slate-300 text-center action-col no-print">
-                        <button onclick="hapusBaris(${index})" class="btn-remove-row text-red-500 hover:text-red-700 p-0.5 rounded transition" title="Hapus Baris">
-                            <svg class="w-3.5 h-3.5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -980,21 +971,25 @@
         }
 
         function terbilang(n) {
+            n = Number(n);
+            if (!Number.isFinite(n)) return 'Nol';
             if (n < 0) return 'Minus ' + terbilang(-n);
+            n = Math.floor(n);
             if (n === 0) return 'Nol';
 
             const satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+            const gabung = (bagian, sisa) => sisa > 0 ? bagian + ' ' + terbilang(sisa) : bagian;
 
             if (n < 12) return satuan[n];
             if (n < 20) return terbilang(n - 10) + ' Belas';
-            if (n < 100) return terbilang(Math.floor(n / 10)) + ' Puluh ' + terbilang(n % 10);
-            if (n < 200) return 'Seratus ' + terbilang(n - 100);
-            if (n < 1000) return terbilang(Math.floor(n / 100)) + ' Ratus ' + terbilang(n % 100);
-            if (n < 2000) return 'Seribu ' + terbilang(n - 1000);
-            if (n < 1000000) return terbilang(Math.floor(n / 1000)) + ' Ribu ' + terbilang(n % 1000);
-            if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + ' Juta ' + terbilang(n % 1000000);
-            if (n < 1000000000000) return terbilang(Math.floor(n / 1000000000)) + ' Miliar ' + terbilang(n % 1000000000);
-            return terbilang(Math.floor(n / 1000000000000)) + ' Triliun ' + terbilang(n % 1000000000000);
+            if (n < 100) return gabung(terbilang(Math.floor(n / 10)) + ' Puluh', n % 10);
+            if (n < 200) return gabung('Seratus', n - 100);
+            if (n < 1000) return gabung(terbilang(Math.floor(n / 100)) + ' Ratus', n % 100);
+            if (n < 2000) return gabung('Seribu', n - 1000);
+            if (n < 1000000) return gabung(terbilang(Math.floor(n / 1000)) + ' Ribu', n % 1000);
+            if (n < 1000000000) return gabung(terbilang(Math.floor(n / 1000000)) + ' Juta', n % 1000000);
+            if (n < 1000000000000) return gabung(terbilang(Math.floor(n / 1000000000)) + ' Miliar', n % 1000000000);
+            return gabung(terbilang(Math.floor(n / 1000000000000)) + ' Triliun', n % 1000000000000);
         }
 
         window.onload = function() {
