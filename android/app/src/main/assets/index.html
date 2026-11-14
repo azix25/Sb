@@ -5998,6 +5998,8 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
             }
 
             const teksAwal = tombol ? tombol.innerHTML : '';
+            const lembarZoomAwal = dokumen.style.zoom;
+            const zoomAplikasiAwal = zoomDokumen;
             const stempelTransparan = dokumen.querySelector('.sumberbeton-extra-stamp');
             const sumberStempelAwal = stempelTransparan ? stempelTransparan.getAttribute('src') : null;
             const filterStempelAwal = stempelTransparan ? stempelTransparan.style.filter : '';
@@ -6012,6 +6014,11 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
             }
 
             try {
+                // Ekspor selalu memakai ukuran A4 asli; zoom layar HP hanya untuk pratinjau.
+                dokumen.style.zoom = '1';
+                zoomDokumen = 1;
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
                 if (document.fonts && document.fonts.ready) {
                     await document.fonts.ready;
                 }
@@ -6099,7 +6106,9 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
                         backgroundColor: '#ffffff',
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: Math.max(document.documentElement.clientWidth, dokumen.scrollWidth),
+                        windowWidth: 794,
+                        windowHeight: 1123,
+                        scale: 2,
                         logging: false
                     },
                     jsPDF: {
@@ -6108,7 +6117,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
                         orientation: 'portrait',
                         compress: true
                     },
-                    pagebreak: { mode: ['css', 'legacy'] }
+                    pagebreak: { mode: [] }
                 };
 
                 if (window.Android && typeof window.Android.savePdf === 'function') {
@@ -6133,6 +6142,11 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
                     stempelTransparan.src = sumberStempelAwal;
                     stempelTransparan.style.filter = filterStempelAwal;
                 }
+                // Pulihkan zoom pratinjau seperti semula setelah PDF selesai dibuat.
+                dokumen.style.zoom = lembarZoomAwal || String(zoomAplikasiAwal);
+                zoomDokumen = zoomAplikasiAwal;
+                const labelZoom = document.getElementById('zoom-level');
+                if (labelZoom) labelZoom.textContent = Math.round(zoomAplikasiAwal * 100) + '%';
                 if (tombol) {
                     tombol.disabled = false;
                     tombol.style.opacity = '';
