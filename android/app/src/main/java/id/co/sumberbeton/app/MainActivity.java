@@ -271,8 +271,11 @@ public class MainActivity extends Activity {
         install.setDataAndType(apkUri, "application/vnd.android.package-archive");
         install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try {
+            // Hapus penanda sebelum membuka installer agar onResume tidak membuka installer berulang.
+            getPreferences(MODE_PRIVATE).edit().remove(KEY_DOWNLOAD_ID).apply();
             startActivity(install);
         } catch (Exception e) {
+            getPreferences(MODE_PRIVATE).edit().putLong(KEY_DOWNLOAD_ID, id).apply();
             Toast.makeText(this, "Android tidak dapat membuka pemasang aplikasi", Toast.LENGTH_LONG).show();
         }
     }
