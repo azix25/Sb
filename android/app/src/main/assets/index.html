@@ -799,8 +799,11 @@
             document.querySelectorAll('.a4-container input[id], .a4-container textarea[id], .a4-container select[id]').forEach(el => {
                 fields[el.id] = el.value;
             });
+            const paymentTerms = Array.from(document.querySelectorAll('#payment-terms-list [data-payment-term]'))
+                .map(el => el.innerText.trim());
             const snapshot = {
                 fields,
+                paymentTerms,
                 items: JSON.parse(JSON.stringify(items)),
                 isPPNAktif
             };
