@@ -922,7 +922,12 @@
                     pagebreak: { mode: ['css', 'legacy'] }
                 };
 
-                await html2pdf().set(opsi).from(dokumen).save();
+                if (window.Android && typeof window.Android.savePdf === 'function') {
+                    const dataPDF = await html2pdf().set(opsi).from(dokumen).outputPdf('datauristring');
+                    window.Android.savePdf(dataPDF, opsi.filename);
+                } else {
+                    await html2pdf().set(opsi).from(dokumen).save();
+                }
                 showToast('PDF berhasil diunduh dengan ketiga gambar tanda tangan.');
             } catch (error) {
                 console.error('Gagal membuat PDF:', error);
