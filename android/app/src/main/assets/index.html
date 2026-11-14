@@ -85,8 +85,8 @@
 
 
     
-        .sumberbeton-stamp{display:block;width:112px;height:112px;margin:0 auto -7px;opacity:.9;transform:rotate(-5deg);}
-        @media print{.sumberbeton-stamp{opacity:.9;}}
+        .sumberbeton-signature{position:relative;min-height:145px;display:flex;flex-direction:column;align-items:center;justify-content:center;isolation:isolate;}.sumberbeton-signature .sumberbeton-stamp{position:absolute;z-index:2;width:154px;height:154px;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(-5deg);opacity:.43;pointer-events:none;}.sumberbeton-signature p,.sumberbeton-signature div{position:relative;z-index:1;}
+        @media print{.sumberbeton-signature .sumberbeton-stamp{opacity:.43;}}
 
     </style>
 </head>
@@ -461,7 +461,7 @@
                         <p class="font-bold text-slate-900" id="sign-client-name">(  )</p>
                     </div>
 
-                    <div>
+                    <div class="sumberbeton-signature">
                         <svg class="sumberbeton-stamp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="Stempel SUMBERBETON"><defs><path id="stampTopArc" d="M 25 112 A 85 85 0 0 1 195 112"/></defs><circle cx="110" cy="110" r="103" fill="none" stroke="#24224f" stroke-width="3.2"/><circle cx="110" cy="110" r="96" fill="none" stroke="#24224f" stroke-width="1.8"/><circle cx="110" cy="110" r="68" fill="none" stroke="#24224f" stroke-width="2.4"/><text fill="#24224f" font-family="Arial,sans-serif" font-size="22" font-weight="900" letter-spacing="1.2"><textPath href="#stampTopArc" startOffset="50%" text-anchor="middle">SUMBER BETON</textPath></text><g fill="none" stroke="#24224f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M68 122 Q110 91 152 122 L142 143 Q110 162 78 143 Z"/><path d="M83 123 L110 137 L137 123"/><path d="M110 132 L110 86 L146 53"/><path d="M136 55 L158 50 L148 69"/></g><text x="110" y="174" text-anchor="middle" fill="#24224f" font-family="Arial,sans-serif" font-size="10.5" font-weight="900">MELAYANI PENGECORAN</text><text x="110" y="187" text-anchor="middle" fill="#24224f" font-family="Arial,sans-serif" font-size="11" font-weight="900">DAN FINISHING TROWEL</text><text x="110" y="201" text-anchor="middle" fill="#24224f" font-family="Arial,sans-serif" font-size="8.5" font-weight="700">www.sumberbeton.com</text></svg>
                         <p class="font-medium text-slate-500 mb-0.5">Hormat Kami,</p>
                         <p class="font-bold brand-sumberbeton-red mb-8">SUMBERBETON</p>
