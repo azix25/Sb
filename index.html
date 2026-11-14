@@ -809,6 +809,9 @@
             }
 
             const teksAwal = tombol ? tombol.innerHTML : '';
+            const stempelTransparan = dokumen.querySelector('.sumberbeton-extra-stamp');
+            const sumberStempelAwal = stempelTransparan ? stempelTransparan.getAttribute('src') : null;
+            const filterStempelAwal = stempelTransparan ? stempelTransparan.style.filter : '';
             if (tombol) {
                 tombol.disabled = true;
                 tombol.style.opacity = '0.65';
@@ -832,6 +835,28 @@
                         img.addEventListener('error', resolve, { once: true });
                     });
                 }));
+
+                // Rasterkan stempel PNG ke PNG hitam dengan alpha asli.
+                // Ini menghindari CSS filter yang sering tidak ikut dirender html2canvas.
+                if (stempelTransparan && stempelTransparan.complete && stempelTransparan.naturalWidth > 0) {
+                    const kanvasStempel = document.createElement('canvas');
+                    kanvasStempel.width = stempelTransparan.naturalWidth;
+                    kanvasStempel.height = stempelTransparan.naturalHeight;
+                    const konteksStempel = kanvasStempel.getContext('2d', { willReadFrequently: true });
+                    konteksStempel.drawImage(stempelTransparan, 0, 0);
+                    const piksel = konteksStempel.getImageData(0, 0, kanvasStempel.width, kanvasStempel.height);
+                    for (let i = 0; i < piksel.data.length; i += 4) {
+                        piksel.data[i] = 0;
+                        piksel.data[i + 1] = 0;
+                        piksel.data[i + 2] = 0;
+                    }
+                    konteksStempel.putImageData(piksel, 0, 0);
+                    stempelTransparan.src = kanvasStempel.toDataURL('image/png');
+                    stempelTransparan.style.filter = 'none';
+                    if (typeof stempelTransparan.decode === 'function') {
+                        await stempelTransparan.decode();
+                    }
+                }
 
                 const opsi = {
                     margin: 0,
@@ -862,6 +887,10 @@
                 console.error('Gagal membuat PDF:', error);
                 showToast('PDF gagal dibuat. Silakan coba kembali.');
             } finally {
+                if (stempelTransparan && sumberStempelAwal) {
+                    stempelTransparan.src = sumberStempelAwal;
+                    stempelTransparan.style.filter = filterStempelAwal;
+                }
                 if (tombol) {
                     tombol.disabled = false;
                     tombol.style.opacity = '';
