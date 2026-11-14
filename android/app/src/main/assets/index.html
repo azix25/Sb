@@ -6100,6 +6100,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
                     filename: 'Surat-Penawaran-SUMBERBETON.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
+                        // Kanvas ekspor dikunci ke ukuran piksel A4; tidak mengikuti zoom pratinjau.
                         scale: 2,
                         useCORS: true,
                         allowTaint: false,
@@ -6108,8 +6109,19 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
                         scrollY: 0,
                         windowWidth: 794,
                         windowHeight: 1123,
-                        scale: 2,
-                        logging: false
+                        logging: false,
+                        onclone: function (dokumenKlon) {
+                            const lembarKlon = dokumenKlon.querySelector('.a4-container');
+                            if (lembarKlon) {
+                                lembarKlon.style.setProperty('zoom', '1', 'important');
+                                lembarKlon.style.setProperty('transform', 'none', 'important');
+                                lembarKlon.style.setProperty('transform-origin', 'top left', 'important');
+                                lembarKlon.style.setProperty('width', '210mm', 'important');
+                                lembarKlon.style.setProperty('height', '297mm', 'important');
+                                lembarKlon.style.setProperty('max-height', '297mm', 'important');
+                                lembarKlon.style.setProperty('box-sizing', 'border-box', 'important');
+                            }
+                        }
                     },
                     jsPDF: {
                         unit: 'mm',
