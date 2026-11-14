@@ -89,6 +89,7 @@
         @media print{.sumberbeton-signature .sumberbeton-stamp{opacity:.43;}}
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="pb-8">
 
@@ -5983,26 +5984,155 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4AU+Z
             showToast("Data dikembalikan ke 5 baris default.");
         }
 
-        function downloadPDF() {
-            // Simpan kondisi surat yang sedang diedit, lalu buka halaman khusus unduh PDF.
-            const fields = {};
-            document.querySelectorAll('.a4-container input[id], .a4-container textarea[id], .a4-container select[id]').forEach(el => {
-                fields[el.id] = el.value;
-            });
-            const paymentTerms = Array.from(document.querySelectorAll('#payment-terms-list [data-payment-term]'))
-                .map(el => el.innerText.trim());
-            const snapshot = {
-                fields,
-                paymentTerms,
-                items: JSON.parse(JSON.stringify(items)),
-                isPPNAktif
-            };
+        async function downloadPDF() {
+            const tombol = document.querySelector('button[onclick="downloadPDF()"]');
+            const dokumen = document.querySelector('.a4-container');
+            if (!dokumen) {
+                showToast('Dokumen surat tidak ditemukan.');
+                return;
+            }
+
+            if (typeof html2pdf !== 'function') {
+                showToast('Fitur PDF belum siap. Periksa koneksi internet lalu coba lagi.');
+                return;
+            }
+
+            const teksAwal = tombol ? tombol.innerHTML : '';
+            const stempelTransparan = dokumen.querySelector('.sumberbeton-extra-stamp');
+            const sumberStempelAwal = stempelTransparan ? stempelTransparan.getAttribute('src') : null;
+            const filterStempelAwal = stempelTransparan ? stempelTransparan.style.filter : '';
+            const stempelSVG = dokumen.querySelector('.sumberbeton-original-stamp');
+            let gambarSVGUntukPDF = null;
+            let urlSVGTemporer = null;
+
+            if (tombol) {
+                tombol.disabled = true;
+                tombol.style.opacity = '0.65';
+                tombol.innerHTML = 'Menyiapkan PDF...';
+            }
+
             try {
-                sessionStorage.setItem('sumberbeton_download_data', JSON.stringify(snapshot));
-                window.location.href = 'download.html';
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
+
+                // Tunggu semua gambar HTML selesai dimuat.
+                const gambar = Array.from(dokumen.querySelectorAll('img'));
+                await Promise.all(gambar.map(img => {
+                    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+                    if (typeof img.decode === 'function') {
+                        return img.decode().catch(() => {});
+                    }
+                    return new Promise(resolve => {
+                        img.addEventListener('load', resolve, { once: true });
+                        img.addEventListener('error', resolve, { once: true });
+                    });
+                }));
+
+                // Ubah stempel SVG beserta gambar logo yang tertanam di dalamnya
+                // menjadi PNG sementara agar html2canvas menangkap keduanya utuh.
+                if (stempelSVG) {
+                    const salinanSVG = stempelSVG.cloneNode(true);
+                    salinanSVG.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    salinanSVG.setAttribute('width', '880');
+                    salinanSVG.setAttribute('height', '880');
+                    const sumberSVG = new XMLSerializer().serializeToString(salinanSVG);
+                    const blobSVG = new Blob([sumberSVG], { type: 'image/svg+xml;charset=utf-8' });
+                    urlSVGTemporer = URL.createObjectURL(blobSVG);
+
+                    const pemuatSVG = new Image();
+                    pemuatSVG.src = urlSVGTemporer;
+                    if (typeof pemuatSVG.decode === 'function') {
+                        await pemuatSVG.decode();
+                    } else {
+                        await new Promise((resolve, reject) => {
+                            pemuatSVG.onload = resolve;
+                            pemuatSVG.onerror = reject;
+                        });
+                    }
+
+                    const kanvasSVG = document.createElement('canvas');
+                    kanvasSVG.width = 880;
+                    kanvasSVG.height = 880;
+                    const konteksSVG = kanvasSVG.getContext('2d');
+                    konteksSVG.drawImage(pemuatSVG, 0, 0, 880, 880);
+
+                    gambarSVGUntukPDF = document.createElement('img');
+                    gambarSVGUntukPDF.className = stempelSVG.getAttribute('class') || '';
+                    gambarSVGUntukPDF.alt = 'Stempel SUMBERBETON beserta logo';
+                    gambarSVGUntukPDF.src = kanvasSVG.toDataURL('image/png');
+                    stempelSVG.replaceWith(gambarSVGUntukPDF);
+                    if (typeof gambarSVGUntukPDF.decode === 'function') {
+                        await gambarSVGUntukPDF.decode();
+                    }
+                }
+
+                // Rasterkan PNG transparan menjadi hitam dengan alpha asli.
+                if (stempelTransparan && stempelTransparan.complete && stempelTransparan.naturalWidth > 0) {
+                    const kanvasStempel = document.createElement('canvas');
+                    kanvasStempel.width = stempelTransparan.naturalWidth;
+                    kanvasStempel.height = stempelTransparan.naturalHeight;
+                    const konteksStempel = kanvasStempel.getContext('2d', { willReadFrequently: true });
+                    konteksStempel.drawImage(stempelTransparan, 0, 0);
+                    const piksel = konteksStempel.getImageData(0, 0, kanvasStempel.width, kanvasStempel.height);
+                    for (let i = 0; i < piksel.data.length; i += 4) {
+                        piksel.data[i] = 0;
+                        piksel.data[i + 1] = 0;
+                        piksel.data[i + 2] = 0;
+                    }
+                    konteksStempel.putImageData(piksel, 0, 0);
+                    stempelTransparan.src = kanvasStempel.toDataURL('image/png');
+                    stempelTransparan.style.filter = 'none';
+                    if (typeof stempelTransparan.decode === 'function') {
+                        await stempelTransparan.decode();
+                    }
+                }
+
+                const opsi = {
+                    margin: 0,
+                    filename: 'Surat-Penawaran-SUMBERBETON.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: false,
+                        backgroundColor: '#ffffff',
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: Math.max(document.documentElement.clientWidth, dokumen.scrollWidth),
+                        logging: false
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                await html2pdf().set(opsi).from(dokumen).save();
+                showToast('PDF berhasil diunduh dengan ketiga gambar tanda tangan.');
             } catch (error) {
-                showToast('Gagal menyiapkan halaman PDF. Silakan coba kembali.');
-                console.error(error);
+                console.error('Gagal membuat PDF:', error);
+                showToast('PDF gagal dibuat. Silakan coba kembali.');
+            } finally {
+                // Kembalikan SVG asli dan PNG asli setelah proses ekspor selesai.
+                if (gambarSVGUntukPDF && stempelSVG && gambarSVGUntukPDF.parentNode) {
+                    gambarSVGUntukPDF.replaceWith(stempelSVG);
+                }
+                if (urlSVGTemporer) {
+                    URL.revokeObjectURL(urlSVGTemporer);
+                }
+                if (stempelTransparan && sumberStempelAwal) {
+                    stempelTransparan.src = sumberStempelAwal;
+                    stempelTransparan.style.filter = filterStempelAwal;
+                }
+                if (tombol) {
+                    tombol.disabled = false;
+                    tombol.style.opacity = '';
+                    tombol.innerHTML = teksAwal;
+                }
             }
         }
 
