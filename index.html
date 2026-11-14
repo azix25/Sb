@@ -427,11 +427,11 @@
             <div class="grid grid-cols-2 gap-2 mb-2 text-[9px]">
                 <div class="bg-slate-50 p-1.5 rounded border border-slate-200">
                     <h4 class="font-bold text-slate-900 mb-0.5 uppercase tracking-wider text-[9px]">Syarat & Ketentuan Pembayaran</h4>
-                    <ol class="list-decimal list-inside space-y-0.5 text-slate-700 leading-tight">
-                        <li>Harga belum termasuk material beton Ready Mix.</li>
-                        <li>Pembayaran: DP 30% SPK, 60% pengerjaan, 10% pasca selesai.</li>
-                        <li>Air & listrik kerja disediakan pihak pemohon/klien.</li>
-                        <li>Penawaran ini berlaku selama 14 hari kerja sejak diterbitkan.</li>
+                    <ol id="payment-terms-list" class="list-decimal list-inside space-y-0.5 text-slate-700 leading-tight">
+                        <li contenteditable="true" data-payment-term="0" class="editable-payment-term rounded-sm focus:outline focus:outline-1 focus:outline-slate-400" title="Ketuk untuk mengedit">Harga belum termasuk material beton Ready Mix.</li>
+                        <li contenteditable="true" data-payment-term="1" class="editable-payment-term rounded-sm focus:outline focus:outline-1 focus:outline-slate-400" title="Ketuk untuk mengedit">Pembayaran: DP 30% SPK, 60% pengerjaan, 10% pasca selesai.</li>
+                        <li contenteditable="true" data-payment-term="2" class="editable-payment-term rounded-sm focus:outline focus:outline-1 focus:outline-slate-400" title="Ketuk untuk mengedit">Air & listrik kerja disediakan pihak pemohon/klien.</li>
+                        <li contenteditable="true" data-payment-term="3" class="editable-payment-term rounded-sm focus:outline focus:outline-1 focus:outline-slate-400" title="Ketuk untuk mengedit">Penawaran ini berlaku selama 14 hari kerja sejak diterbitkan.</li>
                     </ol>
                 </div>
 
@@ -794,8 +794,11 @@
             document.querySelectorAll('.a4-container input[id], .a4-container textarea[id], .a4-container select[id]').forEach(el => {
                 fields[el.id] = el.value;
             });
+            const paymentTerms = Array.from(document.querySelectorAll('#payment-terms-list [data-payment-term]'))
+                .map(el => el.innerText.trim());
             const snapshot = {
                 fields,
+                paymentTerms,
                 items: JSON.parse(JSON.stringify(items)),
                 isPPNAktif
             };
